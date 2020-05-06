@@ -20,12 +20,29 @@ public class CS492Project {
         System.out.println("Starting program...");
         System.out.println("Starting tests...");
         
-        KeyPair kp = RSAFunctions.generateKeyPair();
+        KeyPair kp = RSAFunctions.generateKeyPair("client");
         PublicKey pub = kp.getPublic();
         PrivateKey pri = kp.getPrivate();
         
+        KeyPair kps = RSAFunctions.generateKeyPair("server");
+        PublicKey serverPub = kps.getPublic();
+        PrivateKey serverPri = kps.getPrivate();
+        
         String dir = System.getProperty("user.dir");
         String inputFile = dir + "/SecretFile.docx";
+        
+    
+    //Test new AES + CBC    
+        if(false){
+            //Test File Encryption with public key For Client to send file
+            newAESFunctions.aesEncrypt(serverPub, pri, inputFile, "encrypt");
+            System.out.println("File AES encrypted");
+        }
+        if(true){
+            String result = inputFile + ".enc";
+            newAESFunctions.aesDecrypt(pub, serverPri, result, "decrypt");
+            System.out.println("File AES decrypted");
+        }
         
     //Test AES + CBC    
         if(false){
@@ -33,7 +50,7 @@ public class CS492Project {
             AESFunctions.aesEncrypt(pub, pri, inputFile, "encrypt");
             System.out.println("File AES encrypted");
         }
-        if(true){
+        if(false){
             String result = inputFile + ".enc";
             AESFunctions.aesDecrypt(pub, pri, result, "decrypt");
             System.out.println("File AES decrypted");

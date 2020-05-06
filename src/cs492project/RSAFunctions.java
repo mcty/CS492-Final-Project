@@ -77,50 +77,50 @@ public class RSAFunctions {
     }
     
     //Generates 2048 bit RSA keypair with SecureRandom unless one exists
-    public static KeyPair generateKeyPair() throws Exception {
+    public static KeyPair generateKeyPair(String user) throws Exception {
         
         KeyPair pair;
         String dir = System.getProperty("user.dir");
-        File file = new File(dir + "/Private.key");
+        File file = new File(dir + "/" + user + "Private.key");
         
         if(file.exists() && file.isFile()){
-            pair = recoverKeyPair();
+            pair = recoverKeyPair(user);
             return pair;
         } else {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
             kpg.initialize(2048, new SecureRandom());
             pair = kpg.generateKeyPair();
         
-            saveKeyPair(pair);
+            saveKeyPair(pair, user);
             return pair;
         }
     }
     
     //Saves the keypair generated on first use
-    public static void saveKeyPair(KeyPair kp) throws Exception {
-        try (FileOutputStream out = new FileOutputStream("Private" + ".key")) {
+    public static void saveKeyPair(KeyPair kp, String user) throws Exception {
+        try (FileOutputStream out = new FileOutputStream(user + "Private" + ".key")) {
             out.write(kp.getPrivate().getEncoded());
         }
 
-        try (FileOutputStream out = new FileOutputStream("Public" + ".pub")) {
+        try (FileOutputStream out = new FileOutputStream(user + "Public" + ".pub")) {
             out.write(kp.getPublic().getEncoded());
         }
         
     }
     
     //Returns a keypair from files in run folder
-    public static KeyPair recoverKeyPair() throws Exception {
+    public static KeyPair recoverKeyPair(String user) throws Exception {
         
         String dir = System.getProperty("user.dir");
         
-        Path pathPublic = Paths.get(dir + "/Public.pub");
+        Path pathPublic = Paths.get(dir + "/" + user + "Public.pub");
         byte[] bytesPublic = Files.readAllBytes(pathPublic);
         X509EncodedKeySpec ksPub = new X509EncodedKeySpec(bytesPublic);
         KeyFactory kfPub = KeyFactory.getInstance("RSA");
         PublicKey pub = kfPub.generatePublic(ksPub);
         
         
-        Path pathPrivate = Paths.get(dir + "/Private.key");
+        Path pathPrivate = Paths.get(dir + "/" + user + "Private.key");
         byte[] bytesPrivate = Files.readAllBytes(pathPrivate);
         PKCS8EncodedKeySpec ksPri = new PKCS8EncodedKeySpec(bytesPrivate);
         KeyFactory kfPri = KeyFactory.getInstance("RSA");
@@ -130,6 +130,18 @@ public class RSAFunctions {
         KeyPair pair = new KeyPair(pub, pvt);
         
         return pair;
+    }
+    
+    public static PublicKey getPublicKey(String fileName) throws Exception {
+        String dir = System.getProperty("user.dir");
+        
+        Path pathPublic = Paths.get(dir + "/" + fileName);
+        byte[] bytesPublic = Files.readAllBytes(pathPublic);
+        X509EncodedKeySpec ksPub = new X509EncodedKeySpec(bytesPublic);
+        KeyFactory kfPub = KeyFactory.getInstance("RSA");
+        PublicKey pub = kfPub.generatePublic(ksPub);
+        
+        return pub;
     }
     
     //Encrypts file with either public or private key depending on selected mode
@@ -166,7 +178,7 @@ public class RSAFunctions {
     
     //Test class with tests created for demonstraiting functionality
     public static void test() throws Exception{
-        KeyPair kp = generateKeyPair();
+        KeyPair kp = generateKeyPair("test");
         PublicKey pub = kp.getPublic();
         PrivateKey pri = kp.getPrivate();
         
